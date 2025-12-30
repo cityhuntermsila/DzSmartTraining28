@@ -1,0 +1,8 @@
+{
+  "name": "DZSmartTraining - Fitness Bootcamp Platform",
+  "description": "A high-performance fitness platform featuring AI movement coaching, nutritional planning, health tracking, and bilingual support (French/Arabic).",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
