@@ -9,6 +9,7 @@ declare const drawLandmarks: any;
 declare const POSE_CONNECTIONS: any;
 
 // Helper to ensure reference image analysis
+// Helper to ensure reference image analysis
 const analyzeImagePose = async (imageElement: HTMLImageElement, canvasElement: HTMLCanvasElement, attempt = 0) => {
   if (!imageElement.complete || !imageElement.naturalWidth) return;
 
@@ -45,10 +46,15 @@ const analyzeImagePose = async (imageElement: HTMLImageElement, canvasElement: H
       drawLandmarks(ctx, results.poseLandmarks, { color: '#34d399', lineWidth: 2, radius: 4 });
     }
     ctx.restore();
-    pose.close();
   });
 
-  await pose.send({ image: imageElement });
+  try {
+    await pose.send({ image: imageElement });
+  } catch (error) {
+    console.error("Reference Pose Analysis Error:", error);
+  } finally {
+    await pose.close();
+  }
 };
 
 type YogaPose = 'meditation' | 'mountain' | 'warrior';
@@ -218,8 +224,23 @@ const AICoachPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
   const stopCoaching = () => {
     activeFlag.current = false;
     setIsActive(false);
-    if (cameraRef.current) { cameraRef.current.stop(); cameraRef.current = null; }
-    if (poseInstanceRef.current) { try { poseInstanceRef.current.close(); } catch (e) { } poseInstanceRef.current = null; }
+
+    // Fully stop camera streams
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+
+    if (cameraRef.current) {
+      try { cameraRef.current.stop(); } catch (e) { }
+      cameraRef.current = null;
+    }
+
+    if (poseInstanceRef.current) {
+      try { poseInstanceRef.current.close(); } catch (e) { }
+      poseInstanceRef.current = null;
+    }
 
     // Clear canvas
     if (canvasRef.current) {
