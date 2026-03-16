@@ -15,7 +15,7 @@ export const translations: Record<string, TranslationSet> = {
     },
     hero: {
       title: 'LIBÉREZ L\'ATHLÈTE EN VOUS',
-      subtitle: 'Rejoignez le bootcamp numérique le plus avancé à M\'sila. Entraînement réel. Guidage IA. Résultats prouvés.',
+      subtitle: 'À travers son système Smart Training Assistant, le projet propose une solution innovante de correction posturale en temps réel par analyse vidéo, réduisant ainsi les risques de blessures et optimisant les performances des athlètes.',
       cta1: 'Démarrer',
 
     },
