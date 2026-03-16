@@ -1,9 +1,8 @@
 
 import React from 'react';
-import { Language, TranslationSet } from '../types';
+import { TranslationSet } from '../types';
 
 interface HomePageProps {
-  lang: Language;
   t: TranslationSet;
   onNavigate: (page: string) => void;
 }
@@ -48,7 +47,7 @@ const HomePage: React.FC<HomePageProps> = ({ t, onNavigate }) => {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4">
-          <h1 className="text-6xl md:text-8xl font-black mb-6 tracking-tight leading-none max-w-4xl">
+          <h1 className="text-3xl md:text-5xl font-black mb-6 tracking-tight leading-none max-w-4xl">
             {t.hero.title}
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-2xl font-light italic">
@@ -56,16 +55,22 @@ const HomePage: React.FC<HomePageProps> = ({ t, onNavigate }) => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <button 
-              onClick={() => onNavigate('memberships')}
-              className="bg-red-600 hover:bg-white hover:text-red-600 text-white font-black px-10 py-5 text-xl uppercase tracking-widest transition-all skew-x-[-12deg]"
+              onClick={() => onNavigate('aiCoach')}
+              className="bg-red-600 hover:bg-white hover:text-red-600 text-white font-black px-8 py-5 text-xl uppercase tracking-widest transition-all duration-300 skew-x-[-12deg] hover:scale-105 active:scale-95 shadow-lg shadow-red-900/20"
             >
-              <span className="block skew-x-[12deg]">{t.hero.cta1}</span>
+              <span className="block skew-x-[12deg]">{t.nav.aiCoach}</span>
             </button>
             <button 
-              onClick={() => onNavigate('schedule')}
-              className="border-2 border-white/50 hover:bg-white hover:text-black font-black px-10 py-5 text-xl uppercase tracking-widest transition-all skew-x-[-12deg]"
+              onClick={() => onNavigate('nutrition')}
+              className="bg-red-600 hover:bg-white hover:text-red-600 text-white font-black px-8 py-5 text-xl uppercase tracking-widest transition-all duration-300 skew-x-[-12deg] hover:scale-105 active:scale-95 shadow-lg shadow-red-900/20"
             >
-              <span className="block skew-x-[12deg]">{t.hero.cta2}</span>
+              <span className="block skew-x-[12deg]">{t.nav.nutrition}</span>
+            </button>
+            <button 
+              onClick={() => onNavigate('memberships')}
+              className="bg-red-600 hover:bg-white hover:text-red-600 text-white font-black px-8 py-5 text-xl uppercase tracking-widest transition-all duration-300 skew-x-[-12deg] hover:scale-105 active:scale-95 shadow-lg shadow-red-900/20"
+            >
+              <span className="block skew-x-[12deg]">{t.memberships.title}</span>
             </button>
           </div>
         </div>
@@ -123,7 +128,7 @@ const HomePage: React.FC<HomePageProps> = ({ t, onNavigate }) => {
       <section className="relative py-40 overflow-hidden">
         <div className="absolute inset-0 bg-red-600 skew-y-[-2deg] scale-110 -z-10" />
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-6xl md:text-8xl font-black mb-8 italic uppercase leading-none">
+          <h2 className="text-3xl md:text-5xl font-black mb-8 italic uppercase leading-none">
             {t.home.motivationTitle}
           </h2>
           <button 

@@ -1,10 +1,8 @@
 
 import React, { useEffect } from 'react';
-import { Language, TranslationSet } from '../../types';
+import { TranslationSet } from '../../types';
 
 interface HeaderProps {
-  lang: Language;
-  setLang: (lang: Language) => void;
   t: TranslationSet;
   onNavigate: (page: string) => void;
   currentPage: string;
@@ -13,17 +11,15 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ 
-  lang, setLang, t, onNavigate, currentPage, isMenuOpen, setIsMenuOpen 
+  t, onNavigate, currentPage, isMenuOpen, setIsMenuOpen 
 }) => {
   const navItems = [
     { id: 'home', label: t.nav.home },
-    { id: 'about', label: t.nav.about },
-    { id: 'programs', label: t.nav.programs },
-    { id: 'schedule', label: t.nav.schedule },
-    { id: 'memberships', label: t.nav.memberships },
-    { id: 'nutrition', label: t.nav.nutrition },
     { id: 'aiCoach', label: t.nav.aiCoach },
+    { id: 'nutrition', label: t.nav.nutrition },
     { id: 'contact', label: t.nav.contact },
+    { id: 'memberships', label: t.nav.memberships },
+    { id: 'about', label: t.nav.about },
   ];
 
   // Lock scroll when menu is open
@@ -74,22 +70,8 @@ const Header: React.FC<HeaderProps> = ({
             ))}
           </nav>
 
-          {/* Controls - Language visible even on mobile */}
+          {/* Controls */}
           <div className="flex items-center gap-2 md:gap-4">
-            <div className="flex bg-zinc-900 p-1 rounded-lg border border-white/5">
-              {(['fr', 'ar'] as Language[]).map((l) => (
-                <button
-                  key={l}
-                  onClick={() => setLang(l)}
-                  className={`px-2 py-1 md:px-3 md:py-1 rounded-md text-[10px] md:text-xs font-bold uppercase transition-all ${
-                    lang === l ? 'bg-red-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-            
             <button 
               className="lg:hidden p-2 text-white bg-zinc-900 rounded-lg border border-white/5"
               onClick={() => setIsMenuOpen(true)}
@@ -145,24 +127,6 @@ const Header: React.FC<HeaderProps> = ({
               </button>
             ))}
           </nav>
-        </div>
-
-        {/* Footer info inside menu */}
-        <div className="p-6 text-center bg-black/10 shrink-0 border-t border-white/10">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60 mb-3">Changer Langue</p>
-          <div className="flex justify-center gap-4">
-            {(['fr', 'ar'] as Language[]).map((l) => (
-              <button
-                key={l}
-                onClick={() => setLang(l)}
-                className={`px-8 py-3 rounded-xl text-sm font-black uppercase transition-all ${
-                  lang === l ? 'bg-white text-red-600 shadow-xl' : 'bg-black/20 text-white'
-                }`}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
     </>

@@ -5,10 +5,9 @@ import { generateNutritionPlan } from '../services/geminiService';
 
 interface NutritionPageProps {
   t: TranslationSet;
-  lang: string;
 }
 
-const NutritionPage: React.FC<NutritionPageProps> = ({ t, lang }) => {
+const NutritionPage: React.FC<NutritionPageProps> = ({ t }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [plans, setPlans] = useState<DailyPlan[] | null>(null);
@@ -27,18 +26,15 @@ const NutritionPage: React.FC<NutritionPageProps> = ({ t, lang }) => {
     setPlans(null); // Clear previous plans to show loading properly
 
     try {
-      const data = await generateNutritionPlan(formData, lang);
+      const data = await generateNutritionPlan(formData, 'fr');
       if (data && Array.isArray(data)) {
         setPlans(data);
       } else {
-        throw new Error("Invalid data format received from AI.");
+        throw new Error("Format de données invalide reçu de l'IA.");
       }
     } catch (err: any) {
       console.error("Nutrition Generation Error:", err);
-      console.error("Nutrition Generation Error:", err);
-      setError(lang === 'ar'
-        ? `عذراً، حدث خطأ: ${err.message}`
-        : `Erreur: ${err.message || JSON.stringify(err)}. Vérifiez la console (F12) et la clé API.`);
+      setError(`Erreur: ${err.message || JSON.stringify(err)}. Vérifiez la console (F12) et la clé API.`);
     } finally {
       setLoading(false);
     }

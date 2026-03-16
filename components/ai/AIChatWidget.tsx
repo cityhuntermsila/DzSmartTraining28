@@ -1,14 +1,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { chatWithCoach } from '../../services/geminiService';
-import { Language } from '../../types';
 
-const AIChatWidget: React.FC<{ lang: Language }> = ({ lang }) => {
+const AIChatWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<{ role: 'user' | 'bot', text: string }[]>([
-    { role: 'bot', text: lang === 'ar' ? 'مرحباً! أنا مدربك الذكي. كيف يمكنني مساعدتك اليوم؟' : 'Bonjour! Je suis votre coach IA. Comment puis-je vous aider?' }
+    { role: 'bot', text: 'Bonjour! Je suis votre coach IA. Comment puis-je vous aider?' }
   ]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -27,7 +26,7 @@ const AIChatWidget: React.FC<{ lang: Language }> = ({ lang }) => {
     setLoading(true);
 
     try {
-      const response = await chatWithCoach(userMsg, lang);
+      const response = await chatWithCoach(userMsg, 'fr');
       setMessages(prev => [...prev, { role: 'bot', text: response || "Désolé, j'ai eu une petite absence. Pouvez-vous répéter?" }]);
     } catch (err) {
       setMessages(prev => [...prev, { role: 'bot', text: "Erreur de connexion avec le QG des coachs." }]);
@@ -37,7 +36,7 @@ const AIChatWidget: React.FC<{ lang: Language }> = ({ lang }) => {
   };
 
   return (
-    <div className="fixed bottom-8 right-8 z-[60] rtl:right-auto rtl:left-8">
+    <div className="fixed bottom-8 right-8 z-[60]">
       {/* FAB */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
@@ -55,7 +54,7 @@ const AIChatWidget: React.FC<{ lang: Language }> = ({ lang }) => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="absolute bottom-20 right-0 rtl:right-auto rtl:left-0 w-[350px] md:w-[400px] h-[500px] bg-zinc-900 border border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-300">
+        <div className="absolute bottom-20 right-0 w-[350px] md:w-[400px] h-[500px] bg-zinc-900 border border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-300">
           <div className="p-5 bg-black border-b border-white/5 flex items-center gap-3">
             <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center font-bold">DZ</div>
             <div>
@@ -97,11 +96,11 @@ const AIChatWidget: React.FC<{ lang: Language }> = ({ lang }) => {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="Posez votre question..."
-                className="w-full bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-red-600 outline-none pr-12 rtl:pr-4 rtl:pl-12"
+                className="w-full bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-red-600 outline-none pr-12"
               />
               <button 
                 onClick={handleSend}
-                className="absolute right-2 top-1.5 rtl:right-auto rtl:left-2 bg-red-600 p-2 rounded-lg hover:bg-red-700 transition-colors"
+                className="absolute right-2 top-1.5 bg-red-600 p-2 rounded-lg hover:bg-red-700 transition-colors"
               >
                 <span className="text-xs">OK</span>
               </button>

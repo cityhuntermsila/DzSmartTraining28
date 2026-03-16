@@ -1,23 +1,23 @@
 
-import { Language, TranslationSet } from './types';
+import { TranslationSet } from './types';
 
-export const translations: Record<Language, TranslationSet> = {
+export const translations: Record<string, TranslationSet> = {
   fr: {
     nav: {
       home: 'Accueil',
       about: 'À Propos',
-      programs: 'Programmes',
-      schedule: 'Planning',
+
+
       memberships: 'Abonnements',
-      nutrition: 'Nutrition',
+      nutrition: 'prototype Nutrition',
       contact: 'Contact',
-      aiCoach: 'Coach IA'
+      aiCoach: 'Prototype Coach IA'
     },
     hero: {
       title: 'LIBÉREZ L\'ATHLÈTE EN VOUS',
       subtitle: 'Rejoignez le bootcamp numérique le plus avancé à M\'sila. Entraînement réel. Guidage IA. Résultats prouvés.',
       cta1: 'Démarrer',
-      cta2: 'Voir le Planning'
+
     },
     home: {
       statsMembers: 'Membres',
@@ -29,11 +29,7 @@ export const translations: Record<Language, TranslationSet> = {
       motivationTitle: 'PAS D\'EXCUSES. SEULEMENT DU PROGRÈS.',
       motivationCta: 'Rejoindre la Tribu'
     },
-    programs: {
-      title: 'Arsenal d\'Entraînement',
-      subtitle: 'Choisissez votre arme. Chaque programme est soutenu par des données IA.',
-      bookNow: 'Réserver'
-    },
+
     nutrition: {
       title: 'Générateur de Nutrition IA',
       subtitle: 'Obtenez un plan de repas personnalisé basé sur vos objectifs et préférences.',
@@ -64,7 +60,7 @@ export const translations: Record<Language, TranslationSet> = {
       objectiveDesc: 'Maintenez la précision anatomique pour déclencher le minuteur.'
     },
     memberships: {
-      title: 'NIVEAU DE PUISSANCE',
+      title: 'Abonnements',
       subtitle: 'Rejoignez le bootcamp le plus avancé d\'Algérie.',
       badge: 'Tarification M\'sila',
       popular: 'Populaire',
@@ -72,24 +68,23 @@ export const translations: Record<Language, TranslationSet> = {
       customDesc: 'Tarifs préférentiels pour les entreprises locales à M\'sila.',
       customBtn: 'Support Business →'
     },
-    schedule: {
-      title: 'Planning des Batailles',
-      time: 'Heure',
-      book: 'Réserver',
-      noClass: 'Pas de cours'
-    },
+
     about: {
       title: 'REDÉFINIR LES LIMITES.',
       p1: 'DZSmartTraining n\'est pas né dans un bureau confortable. Il est né de la sueur des bootcamps matinaux. Nous combinons l\'énergie brute de l\'entraînement traditionnel avec la précision technologique moderne.',
-      quote: 'Nous ne suivons pas seulement les répétitions ; nous suivons l\'évolution. Notre but est de rendre le fitness plus intelligent pour M\'sila.',
+      quote: 'Nous ne suivons pas seulement les répétitions ; nous suivons l\'évolution. Notre but est de rendre le fitness plus identifier pour M\'sila.',
       teamTitle: 'L\'Équipe Tactique'
     },
     contact: {
       title: 'Contactez-nous',
       subtitle: 'Prêt à rejoindre l\'élite ? Envoyez-nous un message ou rendez-nous visite à notre QG.',
+      name: 'Oussama Boussadia',
       location: 'Localisation',
+      locationValue: 'Cité laroukat, M\'sila, Algérie, 28000',
       phone: 'Appelez-nous',
+      phoneValue: '0658879345',
       email: 'Email',
+      emailValue: 'bb075398@gmail.com',
       formTitle: 'Envoyer un Message',
       formName: 'Nom Complet',
       formEmail: 'Email',
@@ -110,116 +105,6 @@ export const translations: Record<Language, TranslationSet> = {
       submit: 'Envoyer',
       loading: 'Chargement...',
       currency: 'DZD'
-    }
-  },
-  ar: {
-    nav: {
-      home: 'الرئيسية',
-      about: 'من نحن',
-      programs: 'البرامج',
-      schedule: 'الجدول',
-      memberships: 'العضوية',
-      nutrition: 'التغذية',
-      contact: 'اتصل بنا',
-      aiCoach: 'مدرب الذكاء الاصطناعي'
-    },
-    hero: {
-      title: 'أطلق العنان للرياضي الذي بداخلك',
-      subtitle: 'انضم إلى المعسكر التدريبي الرقمي الأكثر تقدمًا في المسيلة. تدريب حقيقي. توجيه ذكي. نتائج مثبتة.',
-      cta1: 'ابدأ التدريب',
-      cta2: 'عرض الجدول'
-    },
-    home: {
-      statsMembers: 'عضو',
-      statsCoaches: 'مدرب خبير',
-      statsSupport: 'دعم ذكي',
-      statsGains: 'نتائج مضمونة',
-      featuresTitle: 'جيل جديد من التدريب الرقمي',
-      featuresDesc: 'نحن نستخدم أحدث التقنيات لضمان أن يكون تدريبك فعالاً وآمناً وشخصياً.',
-      motivationTitle: 'لا أعذار. فقط تقدم.',
-      motivationCta: 'انضم إلينا'
-    },
-    programs: {
-      title: 'ترسانة التدريب',
-      subtitle: 'اختر سلاحك. كل برنامج مدعوم ببيانات الذكاء الاصطناعي.',
-      bookNow: 'احجز الآن'
-    },
-    nutrition: {
-      title: 'مولد التغذية الذكي',
-      subtitle: 'احصل على خطة وجبات مخصصة بناءً على أهدافك وتفضيلاتك.',
-      formGoal: 'الهدف',
-      formPrefs: 'تفضيلات النظام الغذائي',
-      generateBtn: 'إنشاء الخطة',
-      generating: 'الذكاء الاصطناعي يجهز خطتك...',
-      emptyState: 'املأ النموذج لإنشاء خطة وجبات مخصصة لمدة 7 أيام.',
-      mealTypes: {
-        breakfast: 'فطور الصباح',
-        lunch: 'الغداء',
-        dinner: 'العشاء',
-        snacks: 'وجبات خفيفة'
-      }
-    },
-    aiCoach: {
-      title: 'معلم اليوغا الذكي',
-      subtitle: 'تحليل دقيق للهيكل العظمي مع تعليقات فورية.',
-      startBtn: 'بدء الجلسة',
-      finishBtn: 'إنهاء',
-      feedbackInitial: 'قف أمام الكاميرا.',
-      feedbackScanning: 'جارٍ بدء المسح...',
-      feedbackExcellent: 'ممتاز. حافظ على هذه الوضعية.',
-      feedbackAdjust: 'اضبط وضعيتك قليلاً...',
-      timeAligned: 'الوقت المحقق',
-      vectorsTitle: 'المقاييس التشريحية',
-      objectiveTitle: 'هدف التدريب',
-      objectiveDesc: 'حافظ على الدقة التشريحية لتشغيل مؤقت الممارسة.'
-    },
-    memberships: {
-      title: 'مستوى القوة',
-      subtitle: 'انضم إلى المعسكر التدريبي الأكثر تقدمًا في الجزائر.',
-      badge: 'أسعار المسيلة',
-      popular: 'الأكثر طلباً',
-      customTitle: 'هل تحتاج إلى خطة مخصصة؟',
-      customDesc: 'أسعار تفضيلية للشركات المحلية في المسيلة.',
-      customBtn: 'دعم الأعمال ←'
-    },
-    schedule: {
-      title: 'جدول المعارك',
-      time: 'الوقت',
-      book: 'حجز',
-      noClass: 'لا توجد حصة'
-    },
-    about: {
-      title: 'إعادة تعريف الحدود.',
-      p1: 'DZSmartTraining لم يولد في مكتب مريح. لقد ولد في عرق وجرأة المعسكرات الصباحية. نحن نجمع بين الطاقة الخام للتدريب التقليدي ودقة التكنولوجيا الحديثة.',
-      quote: 'نحن لا نتتبع التكرارات فحسب، بل نتتبع التطور. هدفنا هو جعل اللياقة البدنية أذكى وأسرع في المسيلة.',
-      teamTitle: 'الفريق التكتيكي'
-    },
-    contact: {
-      title: 'اتصل بنا',
-      subtitle: 'مستعد للانضمام إلى النخبة؟ أرسل لنا رسالة أو زرنا في مقرنا بالمسيلة.',
-      location: 'الموقع',
-      phone: 'اتصل بنا',
-      email: 'البريد الإلكتروني',
-      formTitle: 'إرسال رسالة',
-      formName: 'الاسم الكامل',
-      formEmail: 'البريد الإلكتروني',
-      formSubject: 'الموضوع',
-      formMessage: 'الرسالة',
-      formSubmit: 'إرسال الرسالة'
-    },
-    footer: {
-      desc: 'بعيداً عن اللياقة البدنية، نحن نصنع الأساطير. تدريب عالي الأداء مع ذكاء اصطناعي متطور في المسيلة.',
-      quickLinks: 'روابط سريعة',
-      newsletter: 'النشرة الإخبارية',
-      newsletterBtn: 'انطلق',
-      rights: '© 2024 DZSmartTraining المسيلة. بني للأبطال.'
-    },
-    common: {
-      back: 'رجوع',
-      next: 'التالي',
-      submit: 'إرسال',
-      loading: 'جاري التحميل...',
-      currency: 'د.ج'
     }
   }
 };

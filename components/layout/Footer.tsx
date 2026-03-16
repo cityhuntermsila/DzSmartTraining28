@@ -32,8 +32,8 @@ const Footer: React.FC<FooterProps> = ({ t, onNavigate }) => {
         <div>
           <h4 className="font-bold uppercase text-red-500 mb-6 tracking-widest">{t.footer.quickLinks}</h4>
           <ul className="space-y-4">
-            <li><button onClick={() => onNavigate('programs')} className="text-gray-400 hover:text-white transition-colors">{t.nav.programs}</button></li>
-            <li><button onClick={() => onNavigate('schedule')} className="text-gray-400 hover:text-white transition-colors">{t.nav.schedule}</button></li>
+
+
             <li><button onClick={() => onNavigate('memberships')} className="text-gray-400 hover:text-white transition-colors">{t.nav.memberships}</button></li>
             <li><button onClick={() => onNavigate('contact')} className="text-gray-400 hover:text-white transition-colors">{t.nav.contact}</button></li>
           </ul>
@@ -42,9 +42,9 @@ const Footer: React.FC<FooterProps> = ({ t, onNavigate }) => {
         <div>
           <h4 className="font-bold uppercase text-red-500 mb-6 tracking-widest">Contact</h4>
           <ul className="space-y-4 text-gray-400 text-sm">
-            <li>Boulevard du Centre-Ville, M'sila, Algérie</li>
-            <li>+213 35 XX XX XX</li>
-            <li>contact@dzsmarttraining.dz</li>
+            <li>{t.contact.locationValue}</li>
+            <li>{t.contact.phoneValue}</li>
+            <li>{t.contact.emailValue}</li>
           </ul>
         </div>
 

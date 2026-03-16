@@ -1,12 +1,11 @@
 
-export type Language = 'fr' | 'ar';
 
 export interface TranslationSet {
   nav: {
     home: string;
     about: string;
-    programs: string;
-    schedule: string;
+
+
     memberships: string;
     nutrition: string;
     contact: string;
@@ -16,7 +15,7 @@ export interface TranslationSet {
     title: string;
     subtitle: string;
     cta1: string;
-    cta2: string;
+
   };
   home: {
     statsMembers: string;
@@ -28,11 +27,7 @@ export interface TranslationSet {
     motivationTitle: string;
     motivationCta: string;
   };
-  programs: {
-    title: string;
-    subtitle: string;
-    bookNow: string;
-  };
+
   nutrition: {
     title: string;
     subtitle: string;
@@ -71,12 +66,7 @@ export interface TranslationSet {
     customDesc: string;
     customBtn: string;
   };
-  schedule: {
-    title: string;
-    time: string;
-    book: string;
-    noClass: string;
-  };
+
   about: {
     title: string;
     p1: string;
@@ -86,9 +76,13 @@ export interface TranslationSet {
   contact: {
     title: string;
     subtitle: string;
+    name: string;
     location: string;
+    locationValue: string;
     phone: string;
+    phoneValue: string;
     email: string;
+    emailValue: string;
     formTitle: string;
     formName: string;
     formEmail: string;
@@ -112,15 +106,7 @@ export interface TranslationSet {
   };
 }
 
-export interface Program {
-  id: string;
-  title: string;
-  description: string;
-  duration: string;
-  price: number;
-  image: string;
-  category: string;
-}
+
 
 export interface UserHealthData {
   age: number;

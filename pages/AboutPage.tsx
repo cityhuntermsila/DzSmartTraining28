@@ -13,28 +13,7 @@ const AboutPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      <section className="mb-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <h1 className="text-6xl font-black uppercase italic tracking-tighter mb-8 leading-none">
-            {t.about.title}
-          </h1>
-          <p className="text-lg text-gray-400 mb-6 leading-relaxed">
-            {t.about.p1}
-          </p>
-          <div className="bg-red-600/10 border-l-4 border-red-600 p-6 rounded-r-xl italic text-red-500 font-bold">
-            "{t.about.quote}"
-          </div>
-        </div>
-        <div className="relative">
-          <img 
-            src="/images/about-training.jpg" 
-            alt="Training" 
-            className="rounded-[40px] shadow-2xl skew-y-[-2deg]"
-          />
-        </div>
-      </section>
-
-      <section className="max-w-6xl mx-auto px-2">
+      <section className="max-w-6xl mx-auto px-2 mb-24">
         <h2 className="text-4xl font-black uppercase mb-16 italic text-center">{t.about.teamTitle}</h2>
         
         {/* Responsive Flexbox Container: 2 per line on mobile, 3 on large screens */}
@@ -62,6 +41,27 @@ const AboutPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
               </p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center border-t border-white/5 pt-24">
+        <div>
+          <h1 className="text-6xl font-black uppercase italic tracking-tighter mb-8 leading-none">
+            {t.about.title}
+          </h1>
+          <p className="text-lg text-gray-400 mb-6 leading-relaxed">
+            {t.about.p1}
+          </p>
+          <div className="bg-red-600/10 border-l-4 border-red-600 p-6 rounded-r-xl italic text-red-500 font-bold">
+            "{t.about.quote}"
+          </div>
+        </div>
+        <div className="relative">
+          <img 
+            src="/images/about-training.jpg" 
+            alt="Training" 
+            className="rounded-[40px] shadow-2xl skew-y-[-2deg]"
+          />
         </div>
       </section>
     </div>

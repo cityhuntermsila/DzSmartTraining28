@@ -13,24 +13,31 @@ const ContactPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
 
         <div className="space-y-8">
           <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center text-xl">👤</div>
+            <div>
+              <div className="font-bold uppercase tracking-widest text-red-500 mb-1">Responsable</div>
+              <div className="text-gray-300">{t.contact.name}</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center text-xl">📍</div>
             <div>
               <div className="font-bold uppercase tracking-widest text-red-500 mb-1">{t.contact.location}</div>
-              <div className="text-gray-300">Boulevard du Centre-Ville, M'sila, Algérie</div>
+              <div className="text-gray-300">{t.contact.locationValue}</div>
             </div>
           </div>
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center text-xl">📞</div>
             <div>
               <div className="font-bold uppercase tracking-widest text-red-500 mb-1">{t.contact.phone}</div>
-              <div className="text-gray-300">+213 35 XX XX XX / +213 6XX XX XX XX</div>
+              <div className="text-gray-300">{t.contact.phoneValue}</div>
             </div>
           </div>
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center text-xl">📧</div>
             <div>
               <div className="font-bold uppercase tracking-widest text-red-500 mb-1">{t.contact.email}</div>
-              <div className="text-gray-300">contact@dzsmarttraining.dz</div>
+              <div className="text-gray-300">{t.contact.emailValue}</div>
             </div>
           </div>
         </div>
