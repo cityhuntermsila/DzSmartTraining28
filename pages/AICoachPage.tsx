@@ -324,104 +324,118 @@ const AICoachPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 flex-grow">
-        <div className="lg:col-span-3 flex flex-col gap-6">
-          <div className="relative bg-zinc-950 rounded-[40px] overflow-hidden border border-white/10 aspect-video shadow-2xl">
-            {!isActive && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 z-10 bg-black/60 backdrop-blur-md">
-                <div className="w-24 h-24 bg-zinc-900 rounded-full flex items-center justify-center mb-6 border border-white/5 shadow-inner">
-                  <span className="text-4xl animate-bounce">{currentPose.icon}</span>
-                </div>
-                <h3 className="text-2xl font-bold mb-2 uppercase tracking-tighter">Scan Corporel</h3>
-                <p className="text-gray-400 max-w-sm italic text-sm">Le corps entier doit être visible.</p>
-              </div>
-            )}
-            <video ref={videoRef} autoPlay playsInline className={`w-full h-full object-cover transform scale-x-[-1] transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-20'}`} />
-            <canvas ref={canvasRef} width={1280} height={720} className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1] z-20 pointer-events-none" />
-          </div>
-
-          {isActive && (
-            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
-              <div className="flex-grow bg-zinc-900 px-6 py-4 rounded-3xl border border-white/10 shadow-xl flex items-center gap-5">
-                <div className="w-10 h-10 rounded-full bg-red-600/10 flex items-center justify-center border border-red-600/20">
-                  <div className={`w-3 h-3 rounded-full ${isPoseAligned ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-0.5 leading-none">Bio-Feedback</span>
-                  <span className={`text-lg font-bold italic tracking-tight ${isPoseAligned ? 'text-green-400' : 'text-white'}`}>
-                    {feedback}
-                  </span>
-                </div>
-              </div>
-
-              <div className={`px-8 py-4 rounded-2xl skew-x-[-12deg] shadow-2xl transition-all duration-500 flex flex-col items-center justify-center min-w-[180px] ${isPoseAligned ? 'bg-green-600' : 'bg-red-600'}`}>
-                <div className="skew-x-[12deg] text-center text-white">
-                  <div className="text-[9px] font-black uppercase opacity-80 leading-none mb-0.5 text-white">{t.aiCoach.timeAligned}</div>
-                  <div className="text-3xl font-black tabular-nums tracking-tighter leading-none text-white">
-                    {Math.floor(holdTime / 60)}:{String(holdTime % 60).padStart(2, '0')}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-6 bg-zinc-900/30 p-6 rounded-[40px] border border-white/5 h-fit shadow-inner">
-          <div className="bg-red-600 p-5 rounded-[28px] border border-white/10 shadow-xl overflow-hidden">
-            <h3 className="font-bold uppercase mb-3 text-white/70 text-[9px] tracking-[0.2em]">Neural Engine v3.2</h3>
-            <div className="bg-black/30 rounded-xl border border-white/5 overflow-hidden">
-              <div className="relative h-64 w-full overflow-hidden bg-black/50">
+      <div className="flex flex-col gap-8 flex-grow">
+        {/* Main Visual Comparison Zone */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          {/* Reference Guide - Left Column */}
+          <div className="bg-red-600 p-6 rounded-[40px] border border-white/10 shadow-2xl flex flex-col h-full">
+            <h3 className="font-bold uppercase mb-4 text-white/70 text-[10px] tracking-[0.2em]">Neural Engine v3.2 - Guide</h3>
+            <div className="bg-black/30 rounded-3xl border border-white/5 overflow-hidden flex-grow relative min-h-[300px]">
+              <div className="absolute inset-0 w-full h-full">
                 <img
                   ref={refImageRef}
                   src={currentPose.image}
                   alt={currentPose.title}
-                  className="w-full h-full object-contain p-2 grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-700 relative z-10"
+                  className="w-full h-full object-contain p-4 grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-700 relative z-10"
                   crossOrigin="anonymous"
                 />
                 <canvas
                   ref={refCanvasRef}
-                  className="absolute inset-0 w-full h-full object-contain p-2 pointer-events-none z-20"
+                  className="absolute inset-0 w-full h-full object-contain p-4 pointer-events-none z-20"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                <div className="absolute bottom-2 left-3 flex items-center gap-2">
-                  <span className="text-xl">{currentPose.icon}</span>
-                  <div className="font-black uppercase tracking-tight text-sm leading-none text-white">{selectedPose}</div>
-                </div>
               </div>
-              <div className="p-3">
-                <div className={`text-[9px] font-bold uppercase ${isActive ? (isPoseAligned ? 'text-green-300' : 'text-yellow-300 animate-pulse') : 'text-white/40'}`}>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="absolute bottom-4 left-6 flex items-center gap-3">
+                <span className="text-3xl">{currentPose.icon}</span>
+                <div className="font-black uppercase tracking-tight text-xl leading-none text-white">{selectedPose}</div>
+              </div>
+              <div className="absolute top-4 right-6">
+                <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase backdrop-blur-md border border-white/10 ${isActive ? (isPoseAligned ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300 animate-pulse') : 'bg-white/10 text-white/40'}`}>
                   {isActive ? (isPoseAligned ? 'Anatomical Lock' : 'Analyse en cours...') : 'System Standby'}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-red-600 p-5 rounded-[28px] border border-white/10 shadow-xl">
-            <h3 className="font-bold uppercase mb-3 text-white/70 text-[9px] tracking-[0.2em]">{t.aiCoach.vectorsTitle}</h3>
-            <div className="p-4 bg-black/30 rounded-xl border border-white/5">
-              <div className="text-[9px] text-white/50 italic mb-3 uppercase font-black">Vérification de l'alignement</div>
+          {/* Camera Source - Right Column */}
+          <div className="relative bg-zinc-950 rounded-[40px] overflow-hidden border border-white/10 aspect-video shadow-2xl h-full min-h-[300px]">
+            {!isActive && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 z-10 bg-black/60 backdrop-blur-md">
+                <div className="w-24 h-24 bg-zinc-900 rounded-full flex items-center justify-center mb-6 border border-white/5 shadow-inner">
+                  <span className="text-4xl animate-bounce">{currentPose.icon}</span>
+                </div>
+                <h3 className="text-2xl font-bold mb-2 uppercase tracking-tighter">Votre Flux Caméra</h3>
+                <p className="text-gray-400 max-w-sm italic text-sm">Prêt pour l'analyse...</p>
+              </div>
+            )}
+            <video ref={videoRef} autoPlay playsInline className={`w-full h-full object-cover transform scale-x-[-1] transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-20'}`} />
+            <canvas ref={canvasRef} width={1280} height={720} className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1] z-20 pointer-events-none" />
+            
+            {/* Overlay Timer on Camera */}
+            {isActive && (
+              <div className="absolute top-6 right-6 z-30">
+                <div className={`px-6 py-3 rounded-2xl skew-x-[-12deg] shadow-2xl transition-all duration-500 flex flex-col items-center justify-center ${isPoseAligned ? 'bg-green-600' : 'bg-red-600'}`}>
+                  <div className="skew-x-[12deg] text-center text-white">
+                    <div className="text-[10px] font-black uppercase opacity-80 leading-none mb-1 text-white">{t.aiCoach.timeAligned}</div>
+                    <div className="text-2xl font-black tabular-nums tracking-tighter leading-none text-white">
+                      {Math.floor(holdTime / 60)}:{String(holdTime % 60).padStart(2, '0')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Lower Stats & Biofeedback Zone */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Feedback Message */}
+          <div className="lg:col-span-2 flex flex-col gap-4">
+            {isActive ? (
+              <div className="flex-grow bg-zinc-900 px-8 py-6 rounded-[32px] border border-white/10 shadow-xl flex items-center gap-6">
+                <div className="w-14 h-14 rounded-full bg-red-600/10 flex items-center justify-center border border-red-600/20 shrink-0">
+                  <div className={`w-4 h-4 rounded-full ${isPoseAligned ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 mb-1 leading-none">Diagnostic Bio-Anatomique</span>
+                  <span className={`text-2xl font-bold italic tracking-tight ${isPoseAligned ? 'text-green-400' : 'text-white'}`}>
+                    {feedback}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex-grow bg-zinc-900/40 p-8 rounded-[32px] border border-white/5 flex items-center gap-6">
+                 <div className="p-4 rounded-2xl bg-white/5 text-2xl">💡</div>
+                 <p className="text-gray-400 italic text-sm">Positionnez-vous de manière à voir votre corps en entier pour un scan de précision de l'IA.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-6">
+            <div className="bg-zinc-900/80 p-6 rounded-[32px] border border-white/10 shadow-xl">
+              <h3 className="font-bold uppercase mb-4 text-gray-500 text-[10px] tracking-[0.2em]">{t.aiCoach.vectorsTitle}</h3>
               <div className="space-y-3">
                 {currentPose.checklist.map((item, i) => {
                   const statusKey = item.key as keyof JointStatus;
                   const isOk = isActive && jointStatus[statusKey];
                   return (
                     <div key={i} className="flex items-center justify-between">
-                      <span className={`text-[10px] font-bold uppercase transition-colors ${isOk ? 'text-white' : 'text-white/40'}`}>{item.l}</span>
+                      <span className={`text-[11px] font-bold uppercase transition-colors ${isOk ? 'text-white' : 'text-white/40'}`}>{item.l}</span>
                       <div className="flex items-center gap-2">
-                        <div className={`h-1.5 w-10 rounded-full transition-all duration-500 ${isOk ? 'bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.5)]' : 'bg-black/40'}`} />
+                        <div className={`h-1.5 w-12 rounded-full transition-all duration-500 ${isOk ? 'bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.5)]' : 'bg-zinc-800'}`} />
                       </div>
                     </div>
                   );
                 })}
               </div>
             </div>
-          </div>
-
-          <div className="p-5 rounded-[28px] border border-white/10 bg-red-700 flex items-center gap-4 shadow-lg">
-            <div className="text-xl opacity-60 text-white">🎯</div>
-            <div>
-              <div className="text-[9px] font-black uppercase mb-0.5 text-white">{t.aiCoach.objectiveTitle}</div>
-              <p className="text-[9px] text-white/70 leading-tight uppercase font-semibold">{t.aiCoach.objectiveDesc}</p>
+            
+            <div className="p-5 rounded-2xl border border-white/10 bg-red-700 flex items-center gap-4">
+              <div className="text-xl opacity-60 text-white">🎯</div>
+              <div>
+                <div className="text-[10px] font-black uppercase mb-0.5 text-white">{t.aiCoach.objectiveTitle}</div>
+                <p className="text-[10px] text-white/70 leading-tight uppercase font-semibold">{t.aiCoach.objectiveDesc}</p>
+              </div>
             </div>
           </div>
         </div>
