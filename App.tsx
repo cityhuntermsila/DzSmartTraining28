@@ -33,7 +33,7 @@ const App: React.FC = () => {
       case 'home': return <HomePage t={t} onNavigate={setCurrentPage} />;
 
       case 'nutrition': return <NutritionPage t={t} />;
-      case 'aiCoach': return <AICoachPage t={t} />;
+      case 'aiCoach': return <AICoachPage t={t} onNavigate={setCurrentPage} />;
       case 'memberships': return <MembershipPage t={t} />;
       case 'contact': return <ContactPage t={t} />;
       case 'about': return <AboutPage t={t} />;

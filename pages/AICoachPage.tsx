@@ -10,14 +10,14 @@ declare const POSE_CONNECTIONS: any;
 
 // Helper to ensure reference image analysis
 // Helper to ensure reference image analysis
-const analyzeImagePose = async (imageElement: HTMLImageElement, canvasElement: HTMLCanvasElement, attempt = 0) => {
+const analyzeImagePose = async (imageElement: HTMLImageElement, canvasElement: HTMLCanvasElement, onRefLandmarks: (lm: any) => void, attempt = 0) => {
   if (!imageElement.complete || !imageElement.naturalWidth) return;
 
   // Check if MediapPipe Pose is loaded
   if (typeof Pose === 'undefined') {
     if (attempt < 20) {
       console.log("Waiting for MediaPipe Pose...", attempt);
-      setTimeout(() => analyzeImagePose(imageElement, canvasElement, attempt + 1), 500);
+      setTimeout(() => analyzeImagePose(imageElement, canvasElement, onRefLandmarks, attempt + 1), 500);
     }
     return;
   }
@@ -42,6 +42,7 @@ const analyzeImagePose = async (imageElement: HTMLImageElement, canvasElement: H
     ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
     if (results.poseLandmarks) {
+      onRefLandmarks(results.poseLandmarks);
       drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { color: 'rgba(255, 255, 255, 0.6)', lineWidth: 4 });
       drawLandmarks(ctx, results.poseLandmarks, { color: '#34d399', lineWidth: 2, radius: 4 });
     }
@@ -57,7 +58,7 @@ const analyzeImagePose = async (imageElement: HTMLImageElement, canvasElement: H
   }
 };
 
-type YogaPose = 'meditation' | 'mountain' | 'warrior';
+type YogaPose = 'meditation' | 'mountain' | 'warrior' | 'tree' | 'squat' | 'pushup' | 'plank' | 'lunge' | 'burpee';
 
 interface JointStatus {
   spine: boolean;
@@ -99,10 +100,30 @@ const poseData = {
       { l: "Colonne Verticale", key: "spine" },
       { l: "Bras Étendus", key: "limbs" }
     ],
-  }
+  },
+  tree: {
+    title: 'Posture de l\'Arbre (Vrksasana)',
+    icon: '🌳',
+    image: '/images/pose-tree.jpg',
+    checklist: [
+      { l: "Équilibre", key: "balance" },
+      { l: "Colonne Verticale", key: "spine" },
+      { l: "Ouverture Hanche", key: "limbs" },
+      { l: "Mains Jointes", key: "shoulders" }
+    ],
+  },
+  squat: { title: 'Squat', icon: '🦵', image: '', checklist: [], premium: true },
+  pushup: { title: 'Pompes', icon: '💪', image: '', checklist: [], premium: true },
+  plank: { title: 'Planche', icon: '⏸️', image: '', checklist: [], premium: true },
+  lunge: { title: 'Fente', icon: '🚶', image: '', checklist: [], premium: true },
+  burpee: { title: 'Burpee', icon: '🔥', image: '', checklist: [], premium: true }
 };
+interface AICoachPageProps {
+  t: TranslationSet;
+  onNavigate?: (page: string) => void;
+}
 
-const AICoachPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
+const AICoachPage: React.FC<AICoachPageProps> = ({ t, onNavigate }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const refImageRef = useRef<HTMLImageElement>(null);
@@ -112,6 +133,9 @@ const AICoachPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
   const [feedback, setFeedback] = useState(t.aiCoach.feedbackInitial);
   const [holdTime, setHoldTime] = useState(0);
   const [isPoseAligned, setIsPoseAligned] = useState(false);
+  const [userUploadedImage, setUserUploadedImage] = useState<string | null>(null);
+  const userImgRef = useRef<HTMLImageElement>(null);
+  const refLandmarksRef = useRef<any>(null);
   const [jointStatus, setJointStatus] = useState<JointStatus>({
     spine: false,
     shoulders: false,
@@ -124,6 +148,13 @@ const AICoachPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
   const poseInstanceRef = useRef<any>(null);
   const activeFlag = useRef(false);
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const url = URL.createObjectURL(e.target.files[0]);
+      setUserUploadedImage(url);
+    }
+  };
+
   useEffect(() => {
     return () => stopCoaching();
   }, []);
@@ -133,6 +164,13 @@ const AICoachPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
     let angle = Math.abs((radians * 180.0) / Math.PI);
     if (angle > 180.0) angle = 360 - angle;
     return Math.round(angle);
+  };
+
+  const getVector = (l: any[], a: number, b: number) => {
+    const dx = l[b].x - l[a].x;
+    const dy = l[b].y - l[a].y;
+    const mag = Math.hypot(dx, dy) || 1;
+    return { x: dx/mag, y: dy/mag };
   };
 
   const drawJointLabel = (ctx: CanvasRenderingContext2D, point: any, text: string, color: string) => {
@@ -149,7 +187,7 @@ const AICoachPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
   };
 
   const onResults = (results: any) => {
-    if (!activeFlag.current || !canvasRef.current || !videoRef.current) return;
+    if (!activeFlag.current || !canvasRef.current) return;
     const canvasCtx = canvasRef.current.getContext('2d');
     if (!canvasCtx) return;
     canvasCtx.save();
@@ -158,33 +196,64 @@ const AICoachPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
       drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, { color: 'rgba(255, 255, 255, 0.4)', lineWidth: 2 });
       drawLandmarks(canvasCtx, results.poseLandmarks, { color: '#ef4444', lineWidth: 1, radius: 4 });
       const lm = results.poseLandmarks;
-      const shoulderSymmetry = Math.abs(lm[11].y - lm[12].y);
-      const midShoulderX = (lm[11].x + lm[12].x) / 2;
-      const midHipX = (lm[23].x + lm[24].x) / 2;
-      const spineLean = Math.abs(midShoulderX - midHipX);
-      const shoulderScore = Math.max(0, 1 - (shoulderSymmetry / 0.08));
-      const spineScore = Math.max(0, 1 - (spineLean / 0.12));
+
+      let shoulderScore = 0;
+      let spineScore = 0;
       let balanceScore = 0;
       let limbsScore = 0;
-      if (selectedPose === 'mountain') {
-        balanceScore = Math.max(0, 1 - (Math.abs(lm[0].x - midHipX) / 0.1));
-        limbsScore = Math.max(0, 1 - (Math.abs(lm[15].x - lm[11].x) / 0.2));
-      } else if (selectedPose === 'warrior') {
-        const kneeAngle = calculateJointAngle(lm[24], lm[26], lm[28]);
-        balanceScore = Math.max(0, 1 - (Math.abs(kneeAngle - 90) / 45));
-        limbsScore = Math.max(0, 1 - (Math.abs(lm[15].y - lm[11].y) / 0.1));
+
+      if (refLandmarksRef.current) {
+        const ref = refLandmarksRef.current;
+        const strictSim = (segs: number[][]) => {
+           let bestScore = 0;
+           // Test 4 orientations: Normal, MirrorX, MirrorY, MirrorBoth
+           const flips = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
+           
+           flips.forEach(([fx, fy]) => {
+             let dotSum = 0;
+             segs.forEach(([a, b]) => {
+                const v1 = getVector(ref, a, b);
+                const v2 = getVector(lm, a, b);
+                dotSum += (v1.x * (v2.x * fx) + v1.y * (v2.y * fy));
+             });
+             bestScore = Math.max(bestScore, dotSum / segs.length);
+           });
+           return bestScore;
+        };
+        
+        shoulderScore = strictSim([[11, 12]]);
+        spineScore = strictSim([[11, 23], [12, 24], [23, 24], [11, 24], [12, 23]]);
+        balanceScore = strictSim([[23, 25], [24, 26], [25, 27], [26, 28]]);
+        limbsScore = strictSim([[11, 13], [13, 15], [12, 14], [14, 16]]);
       } else {
-        balanceScore = Math.max(0, 1 - (Math.abs(lm[27].y - lm[28].y) / 0.2));
-        limbsScore = lm[15].y > lm[23].y ? 1.0 : 0.0;
+        const shoulderSymmetry = Math.abs(lm[11].y - lm[12].y);
+        const midShoulderX = (lm[11].x + lm[12].x) / 2;
+        const midHipX = (lm[23].x + lm[24].x) / 2;
+        const spineLean = Math.abs(midShoulderX - midHipX);
+        shoulderScore = Math.max(0, 1 - (shoulderSymmetry / 0.08));
+        spineScore = Math.max(0, 1 - (spineLean / 0.12));
+        if (selectedPose === 'mountain') {
+          balanceScore = Math.max(0, 1 - (Math.abs(lm[0].x - midHipX) / 0.1));
+          limbsScore = Math.max(0, 1 - (Math.abs(lm[15].x - lm[11].x) / 0.2));
+        } else if (selectedPose === 'warrior') {
+          const kneeAngle = calculateJointAngle(lm[24], lm[26], lm[28]);
+          balanceScore = Math.max(0, 1 - (Math.abs(kneeAngle - 90) / 45));
+          limbsScore = Math.max(0, 1 - (Math.abs(lm[15].y - lm[11].y) / 0.1));
+        } else {
+          balanceScore = Math.max(0, 1 - (Math.abs(lm[27].y - lm[28].y) / 0.2));
+          limbsScore = lm[15].y > lm[23].y ? 1.0 : 0.0;
+        }
       }
-      const isShoulderOk = shoulderSymmetry < 0.035;
-      const isSpineOk = spineLean < 0.045;
-      const isBalanceOk = balanceScore > 0.8;
-      const isLimbsOk = limbsScore > 0.8;
+
+      const isShoulderOk = shoulderScore > 0.85;
+      const isSpineOk = spineScore > 0.85;
+      const isBalanceOk = balanceScore > 0.80;
+      const isLimbsOk = limbsScore > 0.80;
+
       setJointStatus({ shoulders: isShoulderOk, spine: isSpineOk, balance: isBalanceOk, limbs: isLimbsOk });
       const totalScore = Math.round((shoulderScore * 0.25 + spineScore * 0.35 + balanceScore * 0.2 + limbsScore * 0.2) * 100);
 
-      const allOk = totalScore > 85;
+      const allOk = totalScore >= 85 && isShoulderOk && isSpineOk;
       setIsPoseAligned(allOk);
       if (totalScore < 50) setFeedback("Entrez dans la zone de scan.");
       else if (!isSpineOk) setFeedback("Redressez votre colonne !");
@@ -215,7 +284,7 @@ const AICoachPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
         if (activeFlag.current && poseInstanceRef.current && videoRef.current) {
           try { await poseInstanceRef.current.send({ image: videoRef.current }); } catch (e) { }
         }
-      }, width: 1280, height: 720
+      }, width: 640, height: 480
     });
     camera.start();
     cameraRef.current = camera;
@@ -250,6 +319,7 @@ const AICoachPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
       }
     }
 
+    setUserUploadedImage(null);
     setHoldTime(0);
     setJointStatus({ spine: false, shoulders: false, balance: false, limbs: false });
     setFeedback(t.aiCoach.feedbackInitial);
@@ -257,185 +327,254 @@ const AICoachPage: React.FC<{ t: TranslationSet }> = ({ t }) => {
 
   useEffect(() => {
     let interval: any;
-    if (isActive && isPoseAligned) { interval = setInterval(() => setHoldTime(prev => prev + 1), 1000); }
+    if (isActive && isPoseAligned && !userUploadedImage) { 
+      interval = setInterval(() => setHoldTime(prev => prev + 1), 1000); 
+    }
     return () => clearInterval(interval);
-  }, [isActive, isPoseAligned]);
+  }, [isActive, isPoseAligned, userUploadedImage]);
 
   // Analyze reference pose when selection changes
   useEffect(() => {
     const img = refImageRef.current;
     const canvas = refCanvasRef.current;
     if (img && canvas) {
+      const run = () => analyzeImagePose(img, canvas, (lm) => { refLandmarksRef.current = lm; });
       if (img.complete) {
-        analyzeImagePose(img, canvas);
+        run();
       } else {
-        img.onload = () => analyzeImagePose(img, canvas);
+        img.onload = run;
       }
     }
   }, [selectedPose]);
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12 h-full flex flex-col">
-      {/* Header */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-8 gap-6">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <span className="bg-red-600 px-2 py-0.5 text-[9px] font-black uppercase rounded skew-x-[-12deg]">Elite AI v3.2</span>
-            <h1 className="text-4xl font-black uppercase italic tracking-tighter">{t.aiCoach.title}</h1>
-          </div>
-          <p className="text-gray-400 text-sm">{t.aiCoach.subtitle}</p>
-        </div>
+  // Analyze user uploaded image
+  useEffect(() => {
+    const img = userImgRef.current;
+    if (img && userUploadedImage) {
+      const analyzeUserImg = async () => {
+        if (cameraRef.current) cameraRef.current.stop();
+        activeFlag.current = true;
+        setIsActive(true);
+        setFeedback(t.aiCoach.feedbackScanning);
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full xl:w-auto">
-          <div className="grid grid-cols-3 bg-zinc-900 p-1 rounded-xl border border-white/5 flex-grow sm:flex-grow-0 gap-1">
-            {(['meditation', 'mountain', 'warrior'] as YogaPose[]).map((p) => (
+        if (canvasRef.current) {
+          canvasRef.current.width = img.naturalWidth || 640;
+          canvasRef.current.height = img.naturalHeight || 480;
+        }
+
+        const pose = new Pose({ locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}` });
+        pose.setOptions({ modelComplexity: 2, smoothLandmarks: true, enableSegmentation: false, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+        pose.onResults(onResults);
+        poseInstanceRef.current = pose;
+
+        try {
+          await pose.send({ image: img });
+        } catch (e) {
+          console.error(e);
+        }
+      };
+
+      if (img.complete) {
+        analyzeUserImg();
+      } else {
+        img.onload = analyzeUserImg;
+      }
+    }
+  }, [userUploadedImage, selectedPose]);
+
+  return (
+    <div className="max-w-5xl mx-auto px-2 sm:px-4 py-2 sm:py-4 h-full flex flex-col">
+      {/* Header - Pose Selection */}
+      <div className="flex justify-center mb-3">
+        <div className="flex items-center bg-zinc-900 p-0.5 rounded-xl border border-white/5 w-full sm:w-auto gap-0.5 overflow-x-auto scrollbar-hide">
+          {(['meditation', 'mountain', 'warrior', 'tree', 'squat', 'pushup', 'plank', 'lunge', 'burpee'] as YogaPose[]).map((p) => {
+            const isLocked = (poseData[p] as any).premium;
+            return (
               <button
                 key={p}
-                disabled={isActive}
-                onClick={() => setSelectedPose(p)}
-                className={`flex flex-col items-center justify-center px-3 py-1.5 rounded-lg transition-all duration-300 border border-transparent ${selectedPose === p
-                  ? 'bg-red-600 text-white shadow-lg shadow-red-900/40 border-red-500'
-                  : 'text-gray-500 hover:text-gray-300 hover:bg-white/5 disabled:opacity-30'
+                onClick={() => {
+                  if (isLocked) {
+                    onNavigate?.('memberships');
+                  } else {
+                    setSelectedPose(p);
+                    setUserUploadedImage(null);
+                  }
+                }}
+                className={`flex items-center gap-1 px-3 py-1 rounded-lg transition-all duration-300 border border-transparent whitespace-nowrap group ${selectedPose === p
+                  ? 'bg-red-600 text-white shadow-lg border-red-500'
+                  : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
                   }`}
               >
-                <span className="text-lg mb-0">{poseData[p].icon}</span>
-                <span className="text-[9px] font-black uppercase tracking-tighter whitespace-nowrap">{p}</span>
+                <span className="text-xs">{poseData[p].icon}</span>
+                <span className="text-[7px] font-black uppercase tracking-tighter flex items-center gap-1">
+                  {p}
+                  {isLocked && <span className="text-[6px] opacity-40 group-hover:opacity-100">🔒</span>}
+                </span>
               </button>
-            ))}
-          </div>
-
-          <div className="flex gap-2">
-            {!isActive ? (
-              <button
-                onClick={startCoaching}
-                className="bg-red-600 px-6 py-2.5 rounded-xl font-black uppercase text-sm hover:bg-red-700 transition-all shadow-[0_0_20px_rgba(239,68,68,0.2)] flex-grow sm:flex-grow-0"
-              >
-                {t.aiCoach.startBtn}
-              </button>
-            ) : (
-              <button
-                onClick={stopCoaching}
-                className="bg-zinc-800 px-6 py-2.5 rounded-xl font-black uppercase text-sm hover:bg-white hover:text-black transition-all flex-grow sm:flex-grow-0 border border-white/10"
-              >
-                {t.aiCoach.finishBtn}
-              </button>
-            )}
-          </div>
+            );
+          })}
         </div>
       </div>
 
-      <div className="flex flex-col gap-8 flex-grow">
-        {/* Main Visual Comparison Zone */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-          {/* Reference Guide - Left Column */}
-          <div className="bg-red-600 p-6 rounded-[40px] border border-white/10 shadow-2xl flex flex-col h-full">
-            <h3 className="font-bold uppercase mb-4 text-white/70 text-[10px] tracking-[0.2em]">Neural Engine v3.2 - Guide</h3>
-            <div className="bg-black/30 rounded-3xl border border-white/5 overflow-hidden flex-grow relative min-h-[300px]">
+      <div className="flex flex-col gap-4 flex-grow">
+        {/* Main Dashboard Interaction Zone - 3 Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-[2.5fr_5.5fr_2fr] gap-4 items-stretch">
+          
+          {/* 1. Zone Référence */}
+          <div className="bg-red-600 p-3 rounded-[24px] border border-white/10 shadow-2xl flex flex-col overflow-hidden max-h-[260px]">
+            <h3 className="font-bold uppercase mb-2 text-white/70 text-[9px] tracking-[0.2em] px-1">1. RÉFÉRENCE</h3>
+            <div className="bg-zinc-950/80 rounded-xl border border-white/10 overflow-hidden flex-grow relative min-h-[140px]">
               <div className="absolute inset-0 w-full h-full">
                 <img
                   ref={refImageRef}
                   src={currentPose.image}
                   alt={currentPose.title}
-                  className="w-full h-full object-contain p-4 grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-700 relative z-10"
+                  className="w-full h-full object-contain p-2 grayscale opacity-80 transition-opacity relative z-10"
                   crossOrigin="anonymous"
                 />
-                <canvas
-                  ref={refCanvasRef}
-                  className="absolute inset-0 w-full h-full object-contain p-4 pointer-events-none z-20"
-                />
+                <canvas ref={refCanvasRef} className="absolute inset-0 w-full h-full object-contain p-2 pointer-events-none z-20" />
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-              <div className="absolute bottom-4 left-6 flex items-center gap-3">
-                <span className="text-3xl">{currentPose.icon}</span>
-                <div className="font-black uppercase tracking-tight text-xl leading-none text-white">{selectedPose}</div>
-              </div>
-              <div className="absolute top-4 right-6">
-                <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase backdrop-blur-md border border-white/10 ${isActive ? (isPoseAligned ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300 animate-pulse') : 'bg-white/10 text-white/40'}`}>
-                  {isActive ? (isPoseAligned ? 'Anatomical Lock' : 'Analyse en cours...') : 'System Standby'}
-                </div>
+              <div className="absolute bottom-2 left-3 flex items-center gap-1.5 text-white">
+                <span className="text-lg">{currentPose.icon}</span>
+                <div className="font-black uppercase tracking-tight text-[10px]">{selectedPose}</div>
               </div>
             </div>
           </div>
 
-          {/* Camera Source - Right Column */}
-          <div className="relative bg-zinc-950 rounded-[40px] overflow-hidden border border-white/10 aspect-video shadow-2xl h-full min-h-[300px]">
-            {!isActive && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 z-10 bg-black/60 backdrop-blur-md">
-                <div className="w-24 h-24 bg-zinc-900 rounded-full flex items-center justify-center mb-6 border border-white/5 shadow-inner">
-                  <span className="text-4xl animate-bounce">{currentPose.icon}</span>
-                </div>
-                <h3 className="text-2xl font-bold mb-2 uppercase tracking-tighter">Votre Flux Caméra</h3>
-                <p className="text-gray-400 max-w-sm italic text-sm">Prêt pour l'analyse...</p>
-              </div>
-            )}
-            <video ref={videoRef} autoPlay playsInline className={`w-full h-full object-cover transform scale-x-[-1] transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-20'}`} />
-            <canvas ref={canvasRef} width={1280} height={720} className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1] z-20 pointer-events-none" />
+          {/* 2. Zone Utilisateur (Live ou Photo) */}
+          <div className="bg-zinc-950 p-3 rounded-[24px] border border-white/10 shadow-2xl flex flex-col overflow-hidden relative max-h-[260px]">
+            <h3 className="font-bold uppercase mb-2 text-red-500 text-[9px] tracking-[0.2em] px-1">2. PRATIQUE</h3>
             
-            {/* Overlay Timer on Camera */}
-            {isActive && (
-              <div className="absolute top-6 right-6 z-30">
-                <div className={`px-6 py-3 rounded-2xl skew-x-[-12deg] shadow-2xl transition-all duration-500 flex flex-col items-center justify-center ${isPoseAligned ? 'bg-green-600' : 'bg-red-600'}`}>
-                  <div className="skew-x-[12deg] text-center text-white">
-                    <div className="text-[10px] font-black uppercase opacity-80 leading-none mb-1 text-white">{t.aiCoach.timeAligned}</div>
-                    <div className="text-2xl font-black tabular-nums tracking-tighter leading-none text-white">
-                      {Math.floor(holdTime / 60)}:{String(holdTime % 60).padStart(2, '0')}
+            <div className="flex gap-2 mb-2">
+              <label className="flex-grow py-1.5 rounded-lg text-[8px] font-black uppercase bg-zinc-800 text-white border border-white/10 hover:bg-zinc-700 cursor-pointer transition-all flex items-center justify-center gap-1">
+                <span>📸 PHOTO</span>
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              </label>
+
+              <button
+                onClick={isActive && !userUploadedImage ? stopCoaching : startCoaching}
+                className={`flex-grow py-1.5 rounded-lg text-[8px] font-black uppercase transition-all flex items-center justify-center gap-1 border ${isActive && !userUploadedImage ? 'bg-white text-black border-white' : 'bg-red-600 text-white border-red-600 hover:bg-red-700'}`}
+              >
+                <span>{isActive && !userUploadedImage ? '🛑 STOP' : '🎥 LIVE'}</span>
+              </button>
+            </div>
+
+            <div className="bg-black/40 rounded-xl border border-white/10 overflow-hidden flex-grow relative min-h-[140px] flex items-center justify-center">
+              {!isActive && !userUploadedImage && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 z-10 bg-black/60 backdrop-blur-sm">
+                  <div className="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center mb-2 border border-white/5">
+                    <span className="text-lg">🧘</span>
+                  </div>
+                  <p className="text-gray-500 font-bold uppercase text-[8px] max-w-[120px]">Choisissez une source.</p>
+                </div>
+              )}
+              
+              {userUploadedImage ? (
+                <div className="absolute inset-0 w-full h-full">
+                  <img ref={userImgRef} src={userUploadedImage} crossOrigin="anonymous" className="w-full h-full object-contain z-10" alt="User upload" />
+                  <canvas ref={canvasRef} width={640} height={480} className="absolute inset-0 w-full h-full object-contain z-20 pointer-events-none" />
+                </div>
+              ) : (
+                <div className="absolute inset-0 w-full h-full bg-black/20">
+                  <video ref={videoRef} autoPlay playsInline className={`w-full h-full object-contain transform scale-x-[-1] transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-20'}`} />
+                  <canvas ref={canvasRef} width={640} height={480} className="absolute inset-0 w-full h-full object-contain transform scale-x-[-1] z-20 pointer-events-none" />
+                </div>
+              )}
+
+              {/* Timer Overlay */}
+              {isActive && !userUploadedImage && (
+                <div className="absolute top-4 right-4 z-30">
+                  <div className={`px-3 py-1.5 rounded-xl shadow-2xl transition-all ${isPoseAligned ? 'bg-green-600' : 'bg-red-600 animate-pulse'}`}>
+                    <div className="text-white text-center">
+                      <div className="text-[6px] font-black uppercase opacity-80 leading-none mb-0.5">Aligned</div>
+                      <div className="text-base font-black tabular-nums tracking-tighter leading-none">
+                        {Math.floor(holdTime / 60)}:{String(holdTime % 60).padStart(2, '0')}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          </div>
+
+          {/* 3. Zone Exemples (Gallérie) */}
+          <div className="bg-zinc-900/50 p-3 rounded-[24px] border border-white/5 flex flex-col shadow-xl max-h-[260px]">
+             <h3 className="font-bold uppercase mb-2 text-gray-500 text-[8px] tracking-[0.2em] px-1 text-center font-black italic">PROPOSÉ</h3>
+             <div className="flex-grow overflow-y-auto scrollbar-hide">
+               <div className="grid grid-cols-2 gap-2 pb-2">
+                 {[
+                   { id: '1', img: '/images/meditation.jpg' },
+                   { id: '2', img: '/images/mountain.png' },
+                   { id: '3', img: '/images/warrior1.png' },
+                   { id: '4', img: '/images/warrior2.jpg' },
+                   { id: '5', img: '/images/tree1.jpg' }
+                 ].map((ex) => (
+                   <div 
+                     key={ex.id} 
+                     onClick={() => setUserUploadedImage(ex.img)} 
+                     className="group relative cursor-pointer aspect-square rounded-lg overflow-hidden border border-white/10 bg-black hover:border-red-500 transition-all shadow-md shrink-0"
+                   >
+                     <img src={ex.img} alt="Ex" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                   </div>
+                 ))}
+               </div>
+             </div>
+             <p className="text-[5px] text-zinc-600 font-black uppercase text-center mt-1 shrink-0">Cliquez pour analyser</p>
           </div>
         </div>
 
-        {/* Lower Stats & Biofeedback Zone */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Feedback Message */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
+        {/* Lower Dashboard Zone - 3 Columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {/* 1. Diagnostic Status */}
+          <div className="flex flex-col">
             {isActive ? (
-              <div className="flex-grow bg-zinc-900 px-8 py-6 rounded-[32px] border border-white/10 shadow-xl flex items-center gap-6">
-                <div className="w-14 h-14 rounded-full bg-red-600/10 flex items-center justify-center border border-red-600/20 shrink-0">
-                  <div className={`w-4 h-4 rounded-full ${isPoseAligned ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+              <div className={`flex-grow bg-zinc-900 px-4 py-3 rounded-[20px] border border-white/10 shadow-xl flex items-center gap-3 transition-all duration-500 ${isPoseAligned ? 'border-green-500/30' : 'border-red-500/30'}`}>
+                <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center border border-white/5 shrink-0">
+                  <div className={`w-2 h-2 rounded-full ${isPoseAligned ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 mb-1 leading-none">Diagnostic Bio-Anatomique</span>
-                  <span className={`text-2xl font-bold italic tracking-tight ${isPoseAligned ? 'text-green-400' : 'text-white'}`}>
+                  <span className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-500 mb-0.5 leading-none">Diagnostic</span>
+                  <span className={`text-sm font-bold italic tracking-tight ${isPoseAligned ? 'text-green-400' : 'text-white'}`}>
                     {feedback}
                   </span>
                 </div>
               </div>
             ) : (
-              <div className="flex-grow bg-zinc-900/40 p-8 rounded-[32px] border border-white/5 flex items-center gap-6">
-                 <div className="p-4 rounded-2xl bg-white/5 text-2xl">💡</div>
-                 <p className="text-gray-400 italic text-sm">Positionnez-vous de manière à voir votre corps en entier pour un scan de précision de l'IA.</p>
+              <div className="flex-grow bg-zinc-900/60 p-5 rounded-[20px] border border-red-500/20 flex flex-col items-center justify-center text-center gap-1 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+                <p className="text-white font-black uppercase text-xs sm:text-sm tracking-tighter leading-tight">
+                  Positionnez-vous face à la caméra pour demarrer une pose.<br/>
+                  <span className="text-red-500 text-[10px]">Seulement 04 positions sont disponible sans abonnement</span>
+                </p>
               </div>
             )}
           </div>
 
-          <div className="flex flex-col gap-6">
-            <div className="bg-zinc-900/80 p-6 rounded-[32px] border border-white/10 shadow-xl">
-              <h3 className="font-bold uppercase mb-4 text-gray-500 text-[10px] tracking-[0.2em]">{t.aiCoach.vectorsTitle}</h3>
-              <div className="space-y-3">
-                {currentPose.checklist.map((item, i) => {
-                  const statusKey = item.key as keyof JointStatus;
-                  const isOk = isActive && jointStatus[statusKey];
-                  return (
-                    <div key={i} className="flex items-center justify-between">
-                      <span className={`text-[11px] font-bold uppercase transition-colors ${isOk ? 'text-white' : 'text-white/40'}`}>{item.l}</span>
-                      <div className="flex items-center gap-2">
-                        <div className={`h-1.5 w-12 rounded-full transition-all duration-500 ${isOk ? 'bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.5)]' : 'bg-zinc-800'}`} />
-                      </div>
+          {/* 2. Pose Checklist */}
+          <div className="bg-zinc-900/80 p-3 rounded-[20px] border border-white/10 shadow-xl">
+            <h3 className="font-bold uppercase mb-2 text-gray-500 text-[8px] tracking-[0.2em]">{t.aiCoach.vectorsTitle}</h3>
+            <div className="space-y-1">
+              {currentPose.checklist.map((item, i) => {
+                const statusKey = item.key as keyof JointStatus;
+                const isOk = isActive && jointStatus[statusKey];
+                return (
+                  <div key={i} className="flex items-center justify-between">
+                    <span className={`text-[9px] font-bold uppercase transition-colors ${isOk ? 'text-white' : 'text-white/40'}`}>{item.l}</span>
+                    <div className="flex items-center gap-2">
+                      <div className={`h-1 w-8 rounded-full transition-all duration-500 ${isOk ? 'bg-green-400' : 'bg-zinc-800'}`} />
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
-            
-            <div className="p-5 rounded-2xl border border-white/10 bg-red-700 flex items-center gap-4">
-              <div className="text-xl opacity-60 text-white">🎯</div>
-              <div>
-                <div className="text-[10px] font-black uppercase mb-0.5 text-white">{t.aiCoach.objectiveTitle}</div>
-                <p className="text-[10px] text-white/70 leading-tight uppercase font-semibold">{t.aiCoach.objectiveDesc}</p>
-              </div>
+          </div>
+          
+          {/* 3. Core Objective */}
+          <div className="p-3 rounded-[20px] border border-white/10 bg-red-700/80 flex items-center gap-3 sm:col-span-2 lg:col-span-1">
+            <div className="text-xl opacity-60 text-white">🎯</div>
+            <div>
+              <div className="text-[8px] font-black uppercase mb-0.5 text-white">{t.aiCoach.objectiveTitle}</div>
+              <p className="text-[8px] text-white/70 leading-normal uppercase font-semibold">{t.aiCoach.objectiveDesc}</p>
             </div>
           </div>
         </div>

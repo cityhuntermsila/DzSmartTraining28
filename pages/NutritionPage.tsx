@@ -15,6 +15,9 @@ const NutritionPage: React.FC<NutritionPageProps> = ({ t }) => {
     weight: 80,
     height: 180,
     age: 25,
+    gender: 'Masculin',
+    activityLevel: 'Modéré',
+    mealsPerDay: 3,
     goal: 'Perte de Poids',
     preferences: 'Halal, haute teneur en protéines'
   });
@@ -42,9 +45,9 @@ const NutritionPage: React.FC<NutritionPageProps> = ({ t }) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      <div className="text-center mb-16">
-        <h1 className="text-5xl font-black uppercase italic tracking-tighter mb-4">{t.nutrition.title}</h1>
-        <p className="text-gray-400 max-w-xl mx-auto">{t.nutrition.subtitle}</p>
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-black uppercase italic tracking-tighter mb-4">{t.nutrition.title}</h1>
+        <p className="text-gray-400 text-xs max-w-xl mx-auto">{t.nutrition.subtitle}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -72,12 +75,35 @@ const NutritionPage: React.FC<NutritionPageProps> = ({ t }) => {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Genre</label>
+                <select
+                  className="w-full bg-black border border-white/10 rounded-lg p-2 text-white text-xs outline-none"
+                  value={formData.gender}
+                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                >
+                  <option>Masculin</option>
+                  <option>Féminin</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Âge</label>
+                <input
+                  type="number"
+                  className="w-full bg-black border border-white/10 rounded-lg p-2 text-white text-xs outline-none"
+                  value={formData.age}
+                  onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Poids (kg)</label>
                 <input
                   type="number"
-                  className="w-full bg-black border border-white/10 rounded-lg p-2 text-white"
+                  className="w-full bg-black border border-white/10 rounded-lg p-2 text-white text-xs outline-none"
                   value={formData.weight}
                   onChange={(e) => setFormData({ ...formData, weight: parseInt(e.target.value) })}
                 />
@@ -86,9 +112,36 @@ const NutritionPage: React.FC<NutritionPageProps> = ({ t }) => {
                 <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Taille (cm)</label>
                 <input
                   type="number"
-                  className="w-full bg-black border border-white/10 rounded-lg p-2 text-white"
+                  className="w-full bg-black border border-white/10 rounded-lg p-2 text-white text-xs outline-none"
                   value={formData.height}
                   onChange={(e) => setFormData({ ...formData, height: parseInt(e.target.value) })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Activité</label>
+                <select
+                  className="w-full bg-black border border-white/10 rounded-lg p-2 text-white text-xs outline-none"
+                  value={formData.activityLevel}
+                  onChange={(e) => setFormData({ ...formData, activityLevel: e.target.value })}
+                >
+                  <option>Sédentaire</option>
+                  <option>Modéré</option>
+                  <option>Actif</option>
+                  <option>Très Actif</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Repas / Jour</label>
+                <input
+                  type="number"
+                  min="2"
+                  max="6"
+                  className="w-full bg-black border border-white/10 rounded-lg p-2 text-white text-xs outline-none"
+                  value={formData.mealsPerDay}
+                  onChange={(e) => setFormData({ ...formData, mealsPerDay: parseInt(e.target.value) })}
                 />
               </div>
             </div>
