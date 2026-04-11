@@ -11,7 +11,14 @@ export const translations: Record<string, TranslationSet> = {
       memberships: 'Abonnements',
       nutrition: 'prototype Nutrition',
       contact: 'Contact',
-      aiCoach: 'Prototype Coach IA'
+      aiCoach: 'Prototype Coach IA',
+      crossfit: 'CrossFit',
+      fitness: 'Fitness',
+      cardio: 'Cardio',
+      remiseEnForme: 'Remise en forme',
+      musculation: 'Musculation',
+      running: 'Running',
+      partners: 'Nos Partenaires'
     },
     hero: {
       title: 'LIBÉREZ L\'ATHLÈTE EN VOUS',

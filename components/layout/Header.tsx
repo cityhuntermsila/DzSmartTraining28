@@ -15,11 +15,18 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const navItems = [
     { id: 'home', label: t.nav.home },
+    { id: 'crossfit', label: t.nav.crossfit },
+    { id: 'fitness', label: t.nav.fitness },
+    { id: 'cardio', label: t.nav.cardio },
+    { id: 'remiseEnForme', label: t.nav.remiseEnForme },
+    { id: 'musculation', label: t.nav.musculation },
+    { id: 'running', label: t.nav.running },
     { id: 'aiCoach', label: t.nav.aiCoach },
     { id: 'nutrition', label: t.nav.nutrition },
-    { id: 'contact', label: t.nav.contact },
     { id: 'memberships', label: t.nav.memberships },
     { id: 'about', label: t.nav.about },
+    { id: 'partners', label: t.nav.partners },
+    { id: 'contact', label: t.nav.contact },
   ];
 
   // Lock scroll when menu is open
@@ -56,24 +63,24 @@ const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-6">
+          <nav className="hidden xl:flex items-center gap-2">
             {navItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => handleNav(item.id)}
-                className={`text-sm font-semibold uppercase tracking-wider transition-colors hover:text-red-500 ${
-                  currentPage === item.id ? 'text-red-500' : 'text-gray-300'
-                }`}
-              >
-                {item.label}
-              </button>
+               <button
+                 key={item.id}
+                 onClick={() => handleNav(item.id)}
+                 className={`text-[10px] 2xl:text-xs font-bold uppercase tracking-tighter transition-colors hover:text-red-500 px-1 ${
+                   currentPage === item.id ? 'text-red-500' : 'text-gray-300'
+                 }`}
+               >
+                 {item.label}
+               </button>
             ))}
           </nav>
 
           {/* Controls */}
           <div className="flex items-center gap-2 md:gap-4">
             <button 
-              className="lg:hidden p-2 text-white bg-zinc-900 rounded-lg border border-white/5"
+              className="xl:hidden p-2 text-white bg-zinc-900 rounded-lg border border-white/5"
               onClick={() => setIsMenuOpen(true)}
               aria-label="Menu"
             >
@@ -86,7 +93,7 @@ const Header: React.FC<HeaderProps> = ({
       </header>
 
       {/* MOBILE MENU */}
-      <div className={`lg:hidden fixed inset-0 bg-red-600 z-[100] transition-all duration-500 ease-[cubic-bezier(0.85,0,0.15,1)] flex flex-col ${
+      <div className={`xl:hidden fixed inset-0 bg-red-600 z-[100] transition-all duration-500 ease-[cubic-bezier(0.85,0,0.15,1)] flex flex-col ${
         isMenuOpen ? 'translate-y-0' : '-translate-y-full'
       }`}>
         {/* Top Bar */}
